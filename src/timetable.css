@@ -296,7 +296,21 @@ button:hover {
     touch-action: manipulation;
   }
 }
-/* 모바일 터치 드래그 필수 */
-.timetable-wrapper {
+.timetable-scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+
+  /* 모바일에서 가로 스와이프 허용 */
   touch-action: pan-x;
+
+  /* 스크롤 부드럽게 */
+  -webkit-overflow-scrolling: touch;
+}
+.timetable-wrapper {
+  touch-action: none; /* 셀 드래그용 */
+}
+.timetable {
+  min-width: 900px; /* 모바일 기준, 필요시 조절 */
+  display: grid;
+  grid-template-columns: 72px repeat(7, 1fr);
 }

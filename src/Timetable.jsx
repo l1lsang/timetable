@@ -110,57 +110,52 @@ export default function Timetable({ heatmap = {}, onChange }) {
   }, []);
 
   return (
-    <div
-      className="timetable-wrapper"
-      onMouseUp={handleEnd}
-      onTouchEnd={handleEnd}
-      onTouchMove={handleTouchMove}
-      style={{ touchAction: "none" }} // 🔥 모바일 필수
-    >
-      <div className="timetable">
-        {/* 요일 헤더 */}
-        <div className="header empty" />
-        {DAYS.map((day) => (
-          <div key={day} className="header">
-            {day}
-          </div>
-        ))}
+   <div className="timetable-scroll">
+  <div
+    className="timetable-wrapper"
+    onMouseUp={handleEnd}
+    onTouchEnd={handleEnd}
+    onTouchMove={handleTouchMove}
+  >
+    <div className="timetable">
+      {/* 요일 헤더 */}
+      <div className="header empty" />
+      {DAYS.map((day) => (
+        <div key={day} className="header">{day}</div>
+      ))}
 
-        {/* 시간표 본문 */}
-        {slots.map((time, slotIndex) => (
-          <Fragment key={slotIndex}>
-            {/* 시간 */}
-            <div className="time">{time}</div>
+      {/* 시간표 본문 */}
+      {slots.map((time, slotIndex) => (
+        <Fragment key={slotIndex}>
+          <div className="time">{time}</div>
 
-            {/* 요일별 셀 */}
-            {DAYS.map((_, dayIndex) => {
-              const key = `${dayIndex}-${slotIndex}`;
-              const count = Math.min(heatmap[key] || 0, 5); // 🔥 상한선
+          {DAYS.map((_, dayIndex) => {
+            const key = `${dayIndex}-${slotIndex}`;
+            const count = Math.min(heatmap[key] || 0, 5);
 
-              return (
-                <div
-                  key={key}
-                  data-key={key}
-                  className={`cell ${
-                    mySelected.has(key) ? "me" : ""
-                  }`}
-                 style={{
-  background: mySelected.has(key)
-    ? undefined
-    : count > 0
-    ? `hsl(250, 70%, ${98 - count * 7}%)`
-    : undefined,
-}}
-
-                  onMouseDown={() => handleStart(key)}
-                  onMouseEnter={() => handleMouseEnter(key)}
-                  onTouchStart={() => handleStart(key)}
-                />
-              );
-            })}
-          </Fragment>
-        ))}
-      </div>
+            return (
+              <div
+                key={key}
+                data-key={key}
+                className={`cell ${mySelected.has(key) ? "me" : ""}`}
+                style={{
+                  background: mySelected.has(key)
+                    ? undefined
+                    : count > 0
+                      ? `hsl(250, 70%, ${98 - count * 7}%)`
+                      : undefined,
+                }}
+                onMouseDown={() => handleStart(key)}
+                onMouseEnter={() => handleMouseEnter(key)}
+                onTouchStart={() => handleStart(key)}
+              />
+            );
+          })}
+        </Fragment>
+      ))}
     </div>
+  </div>
+</div>
+
   );
 }
