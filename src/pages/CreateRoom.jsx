@@ -1,6 +1,10 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { doc, setDoc, serverTimestamp } from "firebase/firestore";
+import {
+  doc,
+  writeBatch,
+  serverTimestamp,
+} from "firebase/firestore";
 import { v4 as uuidv4 } from "uuid";
 
 import { db } from "../firebase";
@@ -14,17 +18,22 @@ export default function CreateRoom() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // 🔒 중복 실행 완전 차단용
+  const lockedRef = useRef(false);
+
   const createRoomId = () =>
-    Math.random().toString(36).substring(2, 8).toUpperCase();
+    Math.random().toString(36).slice(2, 8).toUpperCase();
 
   const handleCreateRoom = async () => {
-    if (loading) return;
+    // 🔥 중복 실행 방지
+    if (loading || lockedRef.current) return;
 
     if (!title.trim() || !nickname.trim()) {
       alert("방 이름이랑 닉네임은 꼭 필요해요 🙂");
       return;
     }
 
+    lockedRef.current = true;
     setLoading(true);
 
     try {
@@ -32,17 +41,28 @@ export default function CreateRoom() {
       const userId = uuidv4();
       const passwordHash = password ? hashPassword(password) : null;
 
-      await setDoc(doc(db, "rooms", roomId), {
+      const batch = writeBatch(db);
+
+      // 📁 rooms/{roomId}
+      batch.set(doc(db, "rooms", roomId), {
         title: title.trim(),
         passwordHash,
         createdAt: serverTimestamp(),
       });
 
-      await setDoc(doc(db, "rooms", roomId, "members", userId), {
-        nickname: nickname.trim(),
-        joinedAt: serverTimestamp(),
-      });
+      // 📁 rooms/{roomId}/members/{userId}
+      batch.set(
+        doc(db, "rooms", roomId, "members", userId),
+        {
+          nickname: nickname.trim(),
+          joinedAt: serverTimestamp(),
+        }
+      );
 
+      // 🔥 write 1번으로 처리
+      await batch.commit();
+
+      // 🔑 로컬 저장
       localStorage.setItem("roomId", roomId);
       localStorage.setItem("userId", userId);
       localStorage.setItem("nickname", nickname.trim());
@@ -50,14 +70,27 @@ export default function CreateRoom() {
       navigate(`/room/${roomId}`);
     } catch (error) {
       console.error("❌ 방 생성 오류:", error);
-      alert("앗… 방을 만드는 데 실패했어요 🥲");
+
+      // 🔔 quota 에러 UX
+      if (error?.code === "resource-exhausted") {
+        alert(
+          "요청이 잠시 많아요 🥲\n잠깐만 기다렸다가 다시 시도해주세요!"
+        );
+      } else {
+        alert("앗… 방을 만드는 데 실패했어요 🥲");
+      }
+
+      lockedRef.current = false;
     } finally {
       setLoading(false);
     }
   };
 
-  const onEnter = (e) => {
-    if (e.key === "Enter") handleCreateRoom();
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleCreateRoom();
+    }
   };
 
   return (
@@ -75,7 +108,7 @@ export default function CreateRoom() {
             placeholder="방 이름 (예: 스터디, 회식)"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            onKeyDown={onEnter}
+            onKeyDown={handleKeyDown}
             aria-label="방 이름"
           />
 
@@ -84,7 +117,7 @@ export default function CreateRoom() {
             placeholder="내 닉네임"
             value={nickname}
             onChange={(e) => setNickname(e.target.value)}
-            onKeyDown={onEnter}
+            onKeyDown={handleKeyDown}
             aria-label="닉네임"
           />
 
@@ -94,7 +127,7 @@ export default function CreateRoom() {
             placeholder="비밀번호 (선택)"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            onKeyDown={onEnter}
+            onKeyDown={handleKeyDown}
             aria-label="비밀번호"
           />
 

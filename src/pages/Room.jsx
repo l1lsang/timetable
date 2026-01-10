@@ -26,33 +26,46 @@ function formatSlot(key, count) {
 }
 
 export default function Room() {
+  /* =========================
+     🧍 내 선택 (로컬)
+  ========================= */
   const [mySelection, setMySelection] = useState(new Set());
 
   /* =========================
-     🧑‍🤝‍🧑 더미 데이터 (나 + 다른 사람들)
-     → 나중에 Firestore 데이터로 교체
+     🧑‍🤝‍🧑 다른 사람들 (임시 더미)
+     👉 나중에 Firestore 데이터로 교체
   ========================= */
-  const allSelections = [
-    new Set(["2-6", "2-7", "4-10"]),
-    new Set(["2-6", "4-10"]),
-    mySelection,
-  ];
+  const othersSelections = useMemo(
+    () => [
+      new Set(["2-6", "2-7", "4-10"]),
+      new Set(["2-6", "4-10"]),
+    ],
+    []
+  );
 
   /* =========================
      📊 히트맵 계산
   ========================= */
   const heatmap = useMemo(() => {
     const map = {};
-    allSelections.forEach((set) => {
+
+    // 다른 사람들
+    othersSelections.forEach((set) => {
       set.forEach((k) => {
         map[k] = (map[k] || 0) + 1;
       });
     });
+
+    // 내 선택
+    mySelection.forEach((k) => {
+      map[k] = (map[k] || 0) + 1;
+    });
+
     return map;
-  }, [allSelections]);
+  }, [othersSelections, mySelection]);
 
   /* =========================
-     🔥 TOP3
+     🔥 TOP3 계산
   ========================= */
   const top3 = useMemo(() => {
     return Object.entries(heatmap)
@@ -63,13 +76,13 @@ export default function Room() {
   return (
     <div className="page">
       <div className="content">
-        {/* 시간표 */}
+        {/* 📅 시간표 */}
         <Timetable
           heatmap={heatmap}
-          onChange={setMySelection}
+          onChange={setMySelection} // 🔥 드래그 종료 시 1번
         />
 
-        {/* 사이드 패널 */}
+        {/* 🏆 사이드 패널 */}
         <div className="side-panel">
           <h3>🔥 가장 많이 겹치는 시간</h3>
 
