@@ -178,37 +178,49 @@
     font-size: 12px;
   }
 }
-/* =========================
-   📅 시간표 가로 스크롤 컨테이너
-========================= */
+
+
+
+.timetable-viewport {
+  width: 100%;
+  max-height: calc(100vh - 180px); /* 🔥 중요 */
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  /* 모바일 스크롤 부드럽게 */
+  -webkit-overflow-scrolling: touch;
+}
 .timetable-scroll {
   width: 100%;
   overflow-x: auto;
   overflow-y: hidden;
 
-  /* 🔥 모바일 스크롤 핵심 */
-  -webkit-overflow-scrolling: touch;
   touch-action: pan-x;
+  -webkit-overflow-scrolling: touch;
 
-  /* 페이지 스크롤 방지 */
   overscroll-behavior-x: contain;
 }
-
-/* =========================
-   📦 시간표 wrapper
-========================= */
 .timetable-wrapper {
-  min-width: max-content; /* 🔥 핵심 */
-  padding: 16px;
+  min-width: max-content;   /* 🔥 가로 스크롤 핵심 */
+  padding: 12px;
   background: var(--bg-card);
-  border-radius: 24px;
+  border-radius: 20px;
 }
-
-/* =========================
-   📊 실제 시간표 그리드
-========================= */
 .timetable {
   display: grid;
-  grid-template-columns: 72px repeat(7, minmax(90px, 1fr));
-  min-width: 900px; /* 🔥 모바일 기준 최소 폭 */
+  grid-template-columns: 64px repeat(7, minmax(88px, 1fr));
+  min-width: 760px;   /* 🔥 모바일 기준 가로폭 */
+}
+@media (max-width: 768px) {
+  .timetable-viewport {
+    max-height: calc(100vh - 150px);
+  }
+
+  .timetable {
+    min-width: 720px;
+  }
+
+  .cell {
+    min-height: 30px;
+  }
 }

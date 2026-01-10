@@ -86,6 +86,7 @@ export default function Timetable({
   }, []);
 
   return (
+    <div className="timetable-viewport">
     <div className="timetable-scroll">
       <div className="timetable-wrapper">
         <div className="timetable">
@@ -125,6 +126,6 @@ export default function Timetable({
           ))}
         </div>
       </div>
-    </div>
+    </div></div>
   );
 }
