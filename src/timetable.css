@@ -89,10 +89,11 @@
 
   transition: background 0.15s ease, transform 0.05s ease;
 
-  /* 🔥 핵심 */
-  touch-action: none;
+  /* ✅ 핵심 수정 */
+  touch-action: manipulation;
   pointer-events: auto;
 }
+
 
 .cell:hover {
   background: var(--accent);
