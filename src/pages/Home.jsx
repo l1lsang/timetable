@@ -5,7 +5,7 @@ export default function Home() {
 
   return (
     <div style={wrapper}>
-      <h1 style={{ marginBottom: 12 }}>⏰ 되는 시간 알려줘!!</h1>
+      <h1 style={{ marginBottom: 12 }}>⏰ 언제모임</h1>
       <p style={{ marginBottom: 32, color: "#64748b" }}>
         방을 만들거나, 이미 있는 방에 참여하세요
       </p>
