@@ -121,9 +121,7 @@ button:hover {
   background: var(--accent);
 }
 
-.cell.me {
-  background: var(--primary);
-}
+
 
 .cell:active {
   transform: scale(0.96);
