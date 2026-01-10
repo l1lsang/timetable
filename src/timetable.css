@@ -300,5 +300,5 @@ button:hover {
 }
 /* 모바일 터치 드래그 필수 */
 .timetable-wrapper {
-  touch-action: none;
+  touch-action: pan-x;
 }
