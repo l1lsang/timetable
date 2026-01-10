@@ -1,4 +1,12 @@
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
+import {
+  collection,
+  doc,
+  onSnapshot,
+  setDoc,
+  serverTimestamp,
+} from "firebase/firestore";
+import { db } from "../firebase";
 import Timetable from "../Timetable";
 
 const DAYS = ["월", "화", "수", "목", "금", "토", "일"];
@@ -15,7 +23,7 @@ function slotIndexToTime(slotIndex) {
 }
 
 /* =========================
-   🏷️ TOP3 표시용 포맷
+   🏷️ TOP3 포맷
 ========================= */
 function formatSlot(key, count) {
   const [dayIndex, slotIndex] = key.split("-").map(Number);
@@ -26,26 +34,71 @@ function formatSlot(key, count) {
 }
 
 export default function Room() {
+  const roomId = localStorage.getItem("roomId");
+  const userId = localStorage.getItem("userId");
+
   /* =========================
      🧍 내 선택
   ========================= */
   const [mySelection, setMySelection] = useState(new Set());
 
   /* =========================
-     📊 히트맵
-     👉 지금은 내 선택만 반영
-     👉 나중에 Firestore 데이터 합치기 쉬운 구조
+     👥 모든 멤버 선택
+  ========================= */
+  const [membersSelections, setMembersSelections] = useState([]);
+
+  /* =========================
+     💾 저장 상태
+  ========================= */
+  const [saveState, setSaveState] = useState("idle"); // idle | saving | saved
+
+  /* =========================
+     🔄 실시간 멤버 선택 구독
+     + 내 선택 복구
+  ========================= */
+  useEffect(() => {
+    if (!roomId) return;
+
+    const q = collection(db, "rooms", roomId, "members");
+
+    const unsub = onSnapshot(q, (snap) => {
+      const list = [];
+
+      snap.forEach((docSnap) => {
+        const data = docSnap.data();
+        if (Array.isArray(data.selection)) {
+          list.push(new Set(data.selection));
+        }
+
+        // 🔥 내 선택 복구
+        if (docSnap.id === userId && data.selection) {
+          setMySelection(new Set(data.selection));
+        }
+      });
+
+      setMembersSelections(list);
+    });
+
+    return () => unsub();
+  }, [roomId, userId]);
+
+  /* =========================
+     📊 히트맵 계산
   ========================= */
   const heatmap = useMemo(() => {
     const map = {};
-    mySelection.forEach((key) => {
-      map[key] = (map[key] || 0) + 1;
+
+    membersSelections.forEach((set) => {
+      set.forEach((key) => {
+        map[key] = (map[key] || 0) + 1;
+      });
     });
+
     return map;
-  }, [mySelection]);
+  }, [membersSelections]);
 
   /* =========================
-     🔥 TOP 3
+     🔥 TOP3
   ========================= */
   const top3 = useMemo(() => {
     return Object.entries(heatmap)
@@ -53,13 +106,38 @@ export default function Room() {
       .slice(0, 3);
   }, [heatmap]);
 
+  /* =========================
+     💾 Firestore 저장 (드래그 종료 시)
+  ========================= */
+  const saveSelection = async (selectionSet) => {
+    if (!roomId || !userId) return;
+
+    setSaveState("saving");
+
+    await setDoc(
+      doc(db, "rooms", roomId, "members", userId),
+      {
+        selection: Array.from(selectionSet),
+        updatedAt: serverTimestamp(),
+      },
+      { merge: true }
+    );
+
+    setSaveState("saved");
+
+    setTimeout(() => setSaveState("idle"), 1500);
+  };
+
   return (
     <div className="page">
       <div className="content">
         {/* 📅 시간표 */}
         <Timetable
           heatmap={heatmap}
-          onChange={setMySelection}
+          onChange={(set) => {
+            setMySelection(set);
+            saveSelection(set);
+          }}
         />
 
         {/* 🏆 사이드 패널 */}
@@ -75,6 +153,12 @@ export default function Room() {
               {i + 1}. {formatSlot(key, count)}
             </p>
           ))}
+
+          {/* 💾 저장 상태 */}
+          <div style={{ marginTop: 16, fontSize: 13 }}>
+            {saveState === "saving" && "💾 저장 중…"}
+            {saveState === "saved" && "✅ 저장됨"}
+          </div>
         </div>
       </div>
     </div>
