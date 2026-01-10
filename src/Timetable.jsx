@@ -54,11 +54,7 @@ export default function Timetable({
   const handleMove = (e) => {
     if (!dragging) return;
 
-    const el = document.elementFromPoint(
-      e.clientX,
-      e.clientY
-    );
-
+    const el = document.elementFromPoint(e.clientX, e.clientY);
     if (!el) return;
 
     const key = el.dataset?.key;

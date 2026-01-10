@@ -8,15 +8,9 @@ import {
 import { db } from "../firebase";
 import Timetable from "../Timetable";
 
-/* =========================
-   기본 상수
-========================= */
 const DAYS = ["월", "화", "수", "목", "금", "토", "일"];
 const START_HOUR = 9;
 
-/* =========================
-   ⏰ slotIndex → 시간 문자열
-========================= */
 function slotIndexToTime(slotIndex) {
   const totalMinutes = START_HOUR * 60 + slotIndex * 30;
   const h = Math.floor(totalMinutes / 60);
@@ -24,9 +18,6 @@ function slotIndexToTime(slotIndex) {
   return `${h}:${m.toString().padStart(2, "0")}`;
 }
 
-/* =========================
-   🏷️ TOP3 포맷
-========================= */
 function formatSlot(key, count) {
   const [dayIndex, slotIndex] = key.split("-").map(Number);
   const start = slotIndexToTime(slotIndex);
@@ -38,55 +29,31 @@ export default function Room() {
   const roomId = localStorage.getItem("roomId");
   const userId = localStorage.getItem("userId");
 
-  /* =========================
-     🧍 내 선택
-  ========================= */
   const [mySelection, setMySelection] = useState(new Set());
-
-  /* =========================
-     🧑‍🤝‍🧑 전체 선택 (Firestore)
-  ========================= */
   const [allSelections, setAllSelections] = useState([]);
-
-  /* =========================
-     👥 참여자 목록
-  ========================= */
   const [members, setMembers] = useState([]);
 
-  /* =========================
-     💾 저장 상태 UI
-  ========================= */
-  const [saveState, setSaveState] = useState("saved"); 
-  // "saving" | "saved"
-
+  const [saveState, setSaveState] = useState("saved");
   const saveTimerRef = useRef(null);
-
-  // 🔥 내 선택 복구는 최초 1회만
   const restoredRef = useRef(false);
 
-  /* =========================
-     🔄 selections 실시간 구독
-     - 히트맵용
-     - 내 선택은 최초 1회만 복구
-  ========================= */
+  /* 🔄 selections 구독 */
   useEffect(() => {
     if (!roomId || !userId) return;
 
     const ref = collection(db, "rooms", roomId, "selections");
 
-    const unsubscribe = onSnapshot(ref, (snapshot) => {
+    const unsub = onSnapshot(ref, (snap) => {
       const list = [];
-
-      snapshot.forEach((doc) => {
+      snap.forEach((d) => {
         list.push({
-          userId: doc.id,
-          slots: doc.data().slots || [],
+          userId: d.id,
+          slots: d.data().slots || [],
         });
       });
 
       setAllSelections(list);
 
-      // 🔥 내 선택 복구 (방 입장 시 1회만)
       const mine = list.find((d) => d.userId === userId);
       if (mine && !restoredRef.current) {
         setMySelection(new Set(mine.slots));
@@ -94,37 +61,32 @@ export default function Room() {
       }
     });
 
-    return () => unsubscribe();
+    return () => unsub();
   }, [roomId, userId]);
 
-  /* =========================
-     👥 members 실시간 구독
-  ========================= */
+  /* 👥 members 구독 */
   useEffect(() => {
     if (!roomId) return;
 
     const ref = collection(db, "rooms", roomId, "members");
 
-    const unsubscribe = onSnapshot(ref, (snapshot) => {
+    const unsub = onSnapshot(ref, (snap) => {
       const list = [];
-      snapshot.forEach((doc) => {
+      snap.forEach((d) => {
         list.push({
-          userId: doc.id,
-          nickname: doc.data().nickname,
+          userId: d.id,
+          nickname: d.data().nickname,
         });
       });
       setMembers(list);
     });
 
-    return () => unsubscribe();
+    return () => unsub();
   }, [roomId]);
 
-  /* =========================
-     💾 내 선택 저장
-     (Timetable 드래그 종료 시 1회 호출)
-  ========================= */
-  const handleSaveSelection = async (set) => {
-    setMySelection(set);
+  /* 💾 저장 */
+  const handleSaveSelection = (nextSet) => {
+    setMySelection(nextSet);
     setSaveState("saving");
 
     if (saveTimerRef.current) {
@@ -135,33 +97,26 @@ export default function Room() {
       await setDoc(
         doc(db, "rooms", roomId, "selections", userId),
         {
-          slots: Array.from(set),
+          slots: Array.from(nextSet),
           updatedAt: Date.now(),
         },
         { merge: true }
       );
-
       setSaveState("saved");
     }, 300);
   };
 
-  /* =========================
-     📊 히트맵 계산
-     🔥 Firestore 데이터만 기준
-  ========================= */
+  /* 📊 히트맵 */
   const heatmap = useMemo(() => {
     const map = {};
     allSelections.forEach(({ slots }) => {
-      slots.forEach((key) => {
-        map[key] = (map[key] || 0) + 1;
+      slots.forEach((k) => {
+        map[k] = (map[k] || 0) + 1;
       });
     });
     return map;
   }, [allSelections]);
 
-  /* =========================
-     🔥 TOP3
-  ========================= */
   const top3 = useMemo(() => {
     return Object.entries(heatmap)
       .sort((a, b) => b[1] - a[1])
@@ -171,23 +126,23 @@ export default function Room() {
   return (
     <div className="page">
       <div className="content">
-        {/* =========================
-            📅 시간표
-        ========================= */}
+        {/* 📅 시간표 */}
         <div>
-          <div style={{ marginBottom: 8, fontSize: 13, color: "#666" }}>
+          <div style={{ marginBottom: 8, fontSize: 13 }}>
             {saveState === "saving" ? "저장 중…" : "저장됨 ✓"}
           </div>
 
           <Timetable
+            value={mySelection}
             heatmap={heatmap}
-            onChange={handleSaveSelection}
+            onChange={(next) => {
+              const copied = new Set(next);
+              handleSaveSelection(copied);
+            }}
           />
         </div>
 
-        {/* =========================
-            🏆 사이드 패널
-        ========================= */}
+        {/* 🏆 사이드 패널 */}
         <div className="side-panel">
           <h3>👥 참여 중인 사람</h3>
 
@@ -202,13 +157,11 @@ export default function Room() {
 
           <h3>🔥 가장 많이 겹치는 시간</h3>
 
-          {top3.length === 0 && (
-            <p>아직 선택된 시간이 없어요</p>
-          )}
+          {top3.length === 0 && <p>아직 선택된 시간이 없어요</p>}
 
-          {top3.map(([key, count], index) => (
+          {top3.map(([key, count], i) => (
             <p key={key}>
-              {index + 1}. {formatSlot(key, count)}
+              {i + 1}. {formatSlot(key, count)}
             </p>
           ))}
         </div>
