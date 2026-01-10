@@ -52,7 +52,7 @@ button:focus-visible {
 }
 :root {
   --bg-main: #dad4f9;
-  --bg-card: #dfb9f5;
+  --bg-card: #e2c0f6;
 
   --primary: #6b5cff;        /* 버튼, 선택 셀 */
   --primary-soft: #ede9fe;   /* 셀 기본 */
