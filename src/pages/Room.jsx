@@ -44,7 +44,7 @@ export default function Room() {
   const [mySelection, setMySelection] = useState(new Set());
 
   /* =========================
-     🧑‍🤝‍🧑 전체 선택
+     🧑‍🤝‍🧑 전체 선택 (Firestore)
   ========================= */
   const [allSelections, setAllSelections] = useState([]);
 
@@ -61,8 +61,13 @@ export default function Room() {
 
   const saveTimerRef = useRef(null);
 
+  // 🔥 내 선택 복구는 최초 1회만
+  const restoredRef = useRef(false);
+
   /* =========================
      🔄 selections 실시간 구독
+     - 히트맵용
+     - 내 선택은 최초 1회만 복구
   ========================= */
   useEffect(() => {
     if (!roomId || !userId) return;
@@ -81,10 +86,11 @@ export default function Room() {
 
       setAllSelections(list);
 
-      // 🔥 내 선택 복구
+      // 🔥 내 선택 복구 (방 입장 시 1회만)
       const mine = list.find((d) => d.userId === userId);
-      if (mine) {
+      if (mine && !restoredRef.current) {
         setMySelection(new Set(mine.slots));
+        restoredRef.current = true;
       }
     });
 
@@ -115,12 +121,12 @@ export default function Room() {
 
   /* =========================
      💾 내 선택 저장
+     (Timetable 드래그 종료 시 1회 호출)
   ========================= */
   const handleSaveSelection = async (set) => {
     setMySelection(set);
     setSaveState("saving");
 
-    // debounce 느낌 (UI 안정)
     if (saveTimerRef.current) {
       clearTimeout(saveTimerRef.current);
     }
@@ -141,6 +147,7 @@ export default function Room() {
 
   /* =========================
      📊 히트맵 계산
+     🔥 Firestore 데이터만 기준
   ========================= */
   const heatmap = useMemo(() => {
     const map = {};
