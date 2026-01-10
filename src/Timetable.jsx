@@ -16,26 +16,51 @@ export default function Timetable({ heatmap = {}, onChange }) {
   const [mySelected, setMySelected] = useState(new Set());
 
   /* =========================
-     🖱️ 드래그 선택 로직
+     🧠 셀 토글 (중복 토글 방지)
   ========================= */
   const toggle = (key) => {
     setMySelected((prev) => {
+      if (prev.has(key)) return prev; // 🔥 드래그 중 중복 방지
       const next = new Set(prev);
-      next.has(key) ? next.delete(key) : next.add(key);
+      next.add(key);
       return next;
     });
   };
 
-  const onDown = (key) => {
+  /* =========================
+     🖱️ 마우스 드래그
+  ========================= */
+  const handleMouseDown = (key) => {
     setDragging(true);
     toggle(key);
   };
 
-  const onEnter = (key) => {
+  const handleMouseEnter = (key) => {
     if (dragging) toggle(key);
   };
 
-  const onUp = () => setDragging(false);
+  const handleEnd = () => {
+    setDragging(false);
+  };
+
+  /* =========================
+     📱 모바일 터치 드래그 (핵심)
+  ========================= */
+  const handleTouchMove = (e) => {
+    if (!dragging) return;
+
+    const touch = e.touches[0];
+    const el = document.elementFromPoint(
+      touch.clientX,
+      touch.clientY
+    );
+
+    if (!el) return;
+    if (!el.classList.contains("cell")) return;
+
+    const key = el.dataset.key;
+    if (key) toggle(key);
+  };
 
   /* =========================
      🔄 선택 변경 시 부모에게 전달
@@ -61,48 +86,53 @@ export default function Timetable({ heatmap = {}, onChange }) {
 
   return (
     <div
-      className="timetable"
-      onMouseUp={onUp}
-      onTouchEnd={onUp}
+      className="timetable-wrapper"
+      onMouseUp={handleEnd}
+      onTouchEnd={handleEnd}
+      onTouchMove={handleTouchMove}
     >
-      {/* 요일 헤더 */}
-      <div className="header empty" />
-      {DAYS.map((day) => (
-        <div key={day} className="header">
-          {day}
-        </div>
-      ))}
+      <div className="timetable">
+        {/* 요일 헤더 */}
+        <div className="header empty" />
+        {DAYS.map((day) => (
+          <div key={day} className="header">
+            {day}
+          </div>
+        ))}
 
-      {/* 시간표 본문 */}
-      {slots.map((time, slotIndex) => (
-        <Fragment key={slotIndex}>
-          {/* 시간 */}
-          <div className="time">{time}</div>
+        {/* 시간표 본문 */}
+        {slots.map((time, slotIndex) => (
+          <Fragment key={slotIndex}>
+            {/* 시간 */}
+            <div className="time">{time}</div>
 
-          {/* 요일별 셀 */}
-          {DAYS.map((_, dayIndex) => {
-            const key = `${dayIndex}-${slotIndex}`;
-            const count = heatmap[key] || 0;
+            {/* 요일별 셀 */}
+            {DAYS.map((_, dayIndex) => {
+              const key = `${dayIndex}-${slotIndex}`;
+              const count = heatmap[key] || 0;
 
-            return (
-              <div
-                key={key}
-                className={`cell ${mySelected.has(key) ? "me" : ""}`}
-                style={{
-                  background:
-                    count > 0
-                      ? `rgba(139, 92, 246, ${0.15 * count})`
-                      : undefined,
-                }}
-                onMouseDown={() => onDown(key)}
-                onMouseEnter={() => onEnter(key)}
-                onTouchStart={() => onDown(key)}
-                onTouchMove={() => onEnter(key)}
-              />
-            );
-          })}
-        </Fragment>
-      ))}
+              return (
+                <div
+                  key={key}
+                  data-key={key}                // 🔥 중요
+                  className={`cell ${
+                    mySelected.has(key) ? "me" : ""
+                  }`}
+                  style={{
+                    background:
+                      count > 0
+                        ? `rgba(139, 92, 246, ${0.15 * count})`
+                        : undefined,
+                  }}
+                  onMouseDown={() => handleMouseDown(key)}
+                  onMouseEnter={() => handleMouseEnter(key)}
+                  onTouchStart={() => handleMouseDown(key)}
+                />
+              );
+            })}
+          </Fragment>
+        ))}
+      </div>
     </div>
   );
 }
