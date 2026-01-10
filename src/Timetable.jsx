@@ -138,16 +138,30 @@ export default function Timetable({ heatmap = {}, onChange }) {
                 key={key}
                 data-key={key}
                 className={`cell ${mySelected.has(key) ? "me" : ""}`}
-                style={{
-                  background: mySelected.has(key)
-                    ? undefined
-                    : count > 0
-                      ? `hsl(250, 70%, ${98 - count * 7}%)`
-                      : undefined,
-                }}
-                onMouseDown={() => handleStart(key)}
-                onMouseEnter={() => handleMouseEnter(key)}
-                onTouchStart={() => handleStart(key)}
+               style={{
+  background: mySelected.has(key)
+    ? undefined
+    : count > 0
+      ? `rgba(139, 92, 246, ${0.15 + count * 0.15})`
+      : undefined,
+}}
+
+              onMouseDown={() => {
+  console.log("🖱️ CELL MOUSEDOWN:", key);
+  handleStart(key);
+}}
+
+onMouseEnter={() => {
+  if (!dragging) return;
+  console.log("🖱️ CELL MOUSEENTER:", key);
+  handleMouseEnter(key);
+}}
+
+onTouchStart={() => {
+  console.log("📱 CELL TOUCHSTART:", key);
+  handleStart(key);
+}}
+
               />
             );
           })}
