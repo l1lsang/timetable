@@ -142,13 +142,14 @@ export default function Timetable({ heatmap = {}, onChange }) {
                   className={`cell ${
                     mySelected.has(key) ? "me" : ""
                   }`}
-                  style={{
+style={{
   background: mySelected.has(key)
-    ? undefined                // 🔥 선택된 셀은 class가 담당
+    ? undefined
     : count > 0
-      ? `rgba(139, 92, 246, ${0.15 * count})`
+      ? `hsl(250, 80%, ${94 - count * 6}%)`
       : undefined,
 }}
+
 
                   onMouseDown={() => handleStart(key)}
                   onMouseEnter={() => handleMouseEnter(key)}
