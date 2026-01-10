@@ -222,3 +222,12 @@
     gap: 12px;
   }
 }
+html, body {
+  height: auto;
+  overflow-y: auto;
+}
+
+.page {
+  min-height: 100vh;
+  overflow: visible;
+}
