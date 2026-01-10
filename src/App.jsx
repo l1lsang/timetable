@@ -4,7 +4,7 @@ import Home from "./pages/Home";
 import CreateRoom from "./pages/CreateRoom";
 import JoinRoom from "./pages/JoinRoom";
 import Room from "./pages/Room";
-
+import "./App.css"
 export default function App() {
   return (
     <BrowserRouter>
