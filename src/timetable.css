@@ -90,7 +90,7 @@
   transition: background 0.15s ease, transform 0.05s ease;
 
   /* ✅ 핵심 수정 */
-  touch-action: manipulation;
+ touch-action: none;
   pointer-events: auto;
 }
 

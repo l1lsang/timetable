@@ -19,7 +19,6 @@ export default function Timetable({
 }) {
   const [dragging, setDragging] = useState(false);
   const [dragMode, setDragMode] = useState(null);
-  const [hoverKey, setHoverKey] = useState(null);
 
   const visitedRef = useRef(new Set());
   const safeValue = value instanceof Set ? value : new Set();
@@ -37,8 +36,8 @@ export default function Timetable({
     onChange?.(next);
   };
 
-  const handleStart = (e, key) => {
-    e.preventDefault(); // 🔥 핵심
+  const startDrag = (e, key) => {
+    e.preventDefault();
     const mode = safeValue.has(key) ? "remove" : "add";
     setDragging(true);
     setDragMode(mode);
@@ -46,27 +45,39 @@ export default function Timetable({
     apply(key, mode);
   };
 
-  const handleEnter = (key) => {
-    setHoverKey(key);
-    if (!dragging) return;
-    apply(key, dragMode);
-  };
-
-  const handleEnd = () => {
+  const endDrag = () => {
     setDragging(false);
     setDragMode(null);
     visitedRef.current.clear();
   };
 
-  // 🔥 마우스 / 터치 어디서든 드래그 종료
+  const handleMove = (e) => {
+    if (!dragging) return;
+
+    const el = document.elementFromPoint(
+      e.clientX,
+      e.clientY
+    );
+
+    if (!el) return;
+
+    const key = el.dataset?.key;
+    if (key) {
+      apply(key, dragMode);
+    }
+  };
+
   useEffect(() => {
-    window.addEventListener("pointerup", handleEnd);
-    window.addEventListener("pointercancel", handleEnd);
+    window.addEventListener("pointermove", handleMove);
+    window.addEventListener("pointerup", endDrag);
+    window.addEventListener("pointercancel", endDrag);
+
     return () => {
-      window.removeEventListener("pointerup", handleEnd);
-      window.removeEventListener("pointercancel", handleEnd);
+      window.removeEventListener("pointermove", handleMove);
+      window.removeEventListener("pointerup", endDrag);
+      window.removeEventListener("pointercancel", endDrag);
     };
-  }, []);
+  }, [dragging, dragMode]);
 
   const slots = useMemo(() => {
     const arr = [];
@@ -99,6 +110,7 @@ export default function Timetable({
                 return (
                   <div
                     key={key}
+                    data-key={key}
                     className="cell"
                     style={{
                       background:
@@ -109,16 +121,8 @@ export default function Timetable({
                         ? "2px solid var(--primary)"
                         : "none",
                     }}
-                    onPointerDown={(e) => handleStart(e, key)}
-                    onPointerEnter={() => handleEnter(key)}
-                    onPointerLeave={() => setHoverKey(null)}
-                  >
-                    {hoverKey === key && count > 0 && (
-                      <div className="cell-tooltip">
-                        👥 {count}명 선택
-                      </div>
-                    )}
-                  </div>
+                    onPointerDown={(e) => startDrag(e, key)}
+                  />
                 );
               })}
             </Fragment>
