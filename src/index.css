@@ -112,3 +112,6 @@ button:focus-visible {
   color: var(--text-sub);
   margin-bottom: 32px;
 }
+.cell {
+  pointer-events: auto;
+}
