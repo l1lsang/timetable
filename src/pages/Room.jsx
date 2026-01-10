@@ -1,65 +1,50 @@
-import { useEffect, useMemo, useState, Fragment } from "react";
-import { useParams } from "react-router-dom";
-import {
-  collection,
-  doc,
-  onSnapshot,
-  setDoc,
-  serverTimestamp,
-} from "firebase/firestore";
+import { useState, useMemo } from "react";
+import Timetable from "./Timetable";
 
-import { db } from "../firebase";
-import Timetable from "../Timetable"; // 우리가 만든 시간표
+const DAYS = ["월", "화", "수", "목", "금", "토", "일"];
+const START_HOUR = 9;
+
+/* =========================
+   ⏰ slotIndex → 시간 문자열
+========================= */
+function slotIndexToTime(slotIndex) {
+  const totalMinutes = START_HOUR * 60 + slotIndex * 30;
+  const h = Math.floor(totalMinutes / 60);
+  const m = totalMinutes % 60;
+  return `${h}:${m.toString().padStart(2, "0")}`;
+}
+
+/* =========================
+   🏷️ TOP3 포맷
+========================= */
+function formatSlot(key, count) {
+  const [dayIndex, slotIndex] = key.split("-").map(Number);
+  const start = slotIndexToTime(slotIndex);
+  const end = slotIndexToTime(slotIndex + 1);
+
+  return `${DAYS[dayIndex]} ${start} ~ ${end} (${count}명)`;
+}
 
 export default function Room() {
-  const { roomId } = useParams();
-
-  const userId = localStorage.getItem("userId");
-  const nickname = localStorage.getItem("nickname");
-
-  const [members, setMembers] = useState([]);
-  const [allSelections, setAllSelections] = useState([]);
+  const [mySelection, setMySelection] = useState(new Set());
 
   /* =========================
-     👥 멤버 실시간 구독
+     🧑‍🤝‍🧑 더미 데이터 (나 + 다른 사람들)
+     → 나중에 Firestore 데이터로 교체
   ========================= */
-  useEffect(() => {
-    const unsub = onSnapshot(
-      collection(db, "rooms", roomId, "members"),
-      (snap) => {
-        setMembers(
-          snap.docs.map((d) => ({
-            id: d.id,
-            ...d.data(),
-          }))
-        );
-      }
-    );
-    return unsub;
-  }, [roomId]);
-
-  /* =========================
-     ⏰ 시간 선택 실시간 구독
-  ========================= */
-  useEffect(() => {
-    const unsub = onSnapshot(
-      collection(db, "rooms", roomId, "availability"),
-      (snap) => {
-        setAllSelections(
-          snap.docs.map((d) => d.data().selected || [])
-        );
-      }
-    );
-    return unsub;
-  }, [roomId]);
+  const allSelections = [
+    new Set(["2-6", "2-7", "4-10"]),
+    new Set(["2-6", "4-10"]),
+    mySelection,
+  ];
 
   /* =========================
      📊 히트맵 계산
   ========================= */
   const heatmap = useMemo(() => {
     const map = {};
-    allSelections.forEach((arr) => {
-      arr.forEach((k) => {
+    allSelections.forEach((set) => {
+      set.forEach((k) => {
         map[k] = (map[k] || 0) + 1;
       });
     });
@@ -67,54 +52,34 @@ export default function Room() {
   }, [allSelections]);
 
   /* =========================
-     🏆 TOP 3
+     🔥 TOP3
   ========================= */
-  const top3 = Object.entries(heatmap)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 3);
-
-  /* =========================
-     🔄 내 시간 저장 함수
-  ========================= */
-  const saveMySelection = async (selectedSet) => {
-    if (!userId) return;
-
-    await setDoc(
-      doc(db, "rooms", roomId, "availability", userId),
-      {
-        selected: Array.from(selectedSet),
-        updatedAt: serverTimestamp(),
-      }
-    );
-  };
+  const top3 = useMemo(() => {
+    return Object.entries(heatmap)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3);
+  }, [heatmap]);
 
   return (
     <div className="page">
-      <div className="top-bar">
-        <h2>🏠 방: {roomId}</h2>
-        <span>👤 {nickname}</span>
-      </div>
-
       <div className="content">
-        {/* 📅 시간표 */}
-        <div className="timetable-wrapper">
-          <Timetable
-            heatmap={heatmap}
-            onChange={saveMySelection}
-          />
-        </div>
+        {/* 시간표 */}
+        <Timetable
+          heatmap={heatmap}
+          onChange={setMySelection}
+        />
 
-        {/* 👥 사이드 패널 */}
+        {/* 사이드 패널 */}
         <div className="side-panel">
-          <h3>👥 참여자</h3>
-          {members.map((m) => (
-            <p key={m.id}>• {m.nickname}</p>
-          ))}
+          <h3>🔥 가장 많이 겹치는 시간</h3>
 
-          <h3 style={{ marginTop: 20 }}>🔥 TOP 3</h3>
-          {top3.map(([key, count]) => (
+          {top3.length === 0 && (
+            <p>아직 선택된 시간이 없어요</p>
+          )}
+
+          {top3.map(([key, count], i) => (
             <p key={key}>
-              {key} → {count}명
+              {i + 1}. {formatSlot(key, count)}
             </p>
           ))}
         </div>

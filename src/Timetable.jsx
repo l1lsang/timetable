@@ -1,4 +1,10 @@
-import { useState, useEffect, useMemo, Fragment, useRef } from "react";
+import {
+  useState,
+  useEffect,
+  useMemo,
+  Fragment,
+  useRef,
+} from "react";
 import "./timetable.css";
 
 const DAYS = ["월", "화", "수", "목", "금", "토", "일"];
@@ -9,14 +15,14 @@ const SLOT_PER_HOUR = 2; // 30분
 /**
  * props
  * - heatmap: { "day-slot": number }
- * - onChange: (Set) => void
+ * - onChange: (Set) => void  // 🔥 드래그 종료 시 한 번만 호출
  */
 export default function Timetable({ heatmap = {}, onChange }) {
   const [dragging, setDragging] = useState(false);
   const [dragMode, setDragMode] = useState(null); // "add" | "remove"
   const [mySelected, setMySelected] = useState(new Set());
 
-  // 🔁 이번 드래그에서 이미 처리한 셀 기록
+  // 🔁 이번 드래그에서 이미 처리한 셀
   const visitedRef = useRef(new Set());
 
   /* =========================
@@ -31,11 +37,8 @@ export default function Timetable({ heatmap = {}, onChange }) {
     setMySelected((prev) => {
       const next = new Set(prev);
 
-      if (mode === "add") {
-        next.add(key);
-      } else if (mode === "remove") {
-        next.delete(key);
-      }
+      if (mode === "add") next.add(key);
+      if (mode === "remove") next.delete(key);
 
       return next;
     });
@@ -69,6 +72,8 @@ export default function Timetable({ heatmap = {}, onChange }) {
   const handleTouchMove = (e) => {
     if (!dragging) return;
 
+    e.preventDefault(); // 🔥 모바일 스크롤 방지
+
     const touch = e.touches[0];
     const el = document.elementFromPoint(
       touch.clientX,
@@ -86,14 +91,10 @@ export default function Timetable({ heatmap = {}, onChange }) {
     setDragging(false);
     setDragMode(null);
     visitedRef.current.clear();
-  };
 
-  /* =========================
-     🔄 선택 변경 시 부모에게 전달
-  ========================= */
-  useEffect(() => {
+    // 🔥 여기서만 부모에게 전달 (Firestore 저장용)
     onChange?.(mySelected);
-  }, [mySelected, onChange]);
+  };
 
   /* =========================
      ⏰ 시간 슬롯 생성
@@ -114,6 +115,7 @@ export default function Timetable({ heatmap = {}, onChange }) {
       onMouseUp={handleEnd}
       onTouchEnd={handleEnd}
       onTouchMove={handleTouchMove}
+      style={{ touchAction: "none" }} // 🔥 모바일 필수
     >
       <div className="timetable">
         {/* 요일 헤더 */}
@@ -133,7 +135,7 @@ export default function Timetable({ heatmap = {}, onChange }) {
             {/* 요일별 셀 */}
             {DAYS.map((_, dayIndex) => {
               const key = `${dayIndex}-${slotIndex}`;
-              const count = heatmap[key] || 0;
+              const count = Math.min(heatmap[key] || 0, 5); // 🔥 상한선
 
               return (
                 <div
@@ -142,15 +144,13 @@ export default function Timetable({ heatmap = {}, onChange }) {
                   className={`cell ${
                     mySelected.has(key) ? "me" : ""
                   }`}
-style={{
-  background: mySelected.has(key)
-    ? undefined
-    : count > 0
-      ? `hsl(250, 80%, ${94 - count * 6}%)`
-      : undefined,
-}}
-
-
+                  style={{
+                    background: mySelected.has(key)
+                      ? undefined
+                      : count > 0
+                      ? `hsl(250, 80%, ${94 - count * 6}%)`
+                      : undefined,
+                  }}
                   onMouseDown={() => handleStart(key)}
                   onMouseEnter={() => handleMouseEnter(key)}
                   onTouchStart={() => handleStart(key)}
