@@ -72,3 +72,20 @@ html, body {
   cursor: pointer;
   touch-action: none;      /* 드래그용 */
 }
+/* 가로 스크롤 기본 */
+.timetable-scroll {
+  overflow-x: auto;
+  overflow-y: visible;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x;
+}
+
+/* 🔥 드래그 중에는 스크롤 제스처 잠금 → 세로 드래그 가능 */
+.timetable-scroll.dragging {
+  touch-action: none;
+}
+
+.cell {
+  user-select: none;
+  -webkit-user-select: none;
+}

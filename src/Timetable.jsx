@@ -36,38 +36,53 @@ export default function Timetable({
     onChange?.(next);
   };
 
-const startDrag = (e, key) => {
-  e.preventDefault();
-  e.currentTarget.setPointerCapture?.(e.pointerId);
+  /* =========================
+     🔥 드래그 시작
+  ========================= */
+  const startDrag = (e, key) => {
+    e.preventDefault(); // 스크롤/텍스트선택 차단
+    e.currentTarget.setPointerCapture?.(e.pointerId);
 
-  const mode = safeValue.has(key) ? "remove" : "add";
-  setDragging(true);
-  setDragMode(mode);
-  visitedRef.current.clear();
-  apply(key, mode);
-};
+    const mode = safeValue.has(key) ? "remove" : "add";
+    setDragging(true);
+    setDragMode(mode);
+    visitedRef.current.clear();
+    apply(key, mode);
+  };
 
+  /* =========================
+     🔥 드래그 종료
+  ========================= */
   const endDrag = () => {
     setDragging(false);
     setDragMode(null);
     visitedRef.current.clear();
   };
 
-const handleMove = (e) => {
-  if (!dragging) return;
+  /* =========================
+     🔥 드래그 이동 (가로 + 세로)
+  ========================= */
+  const handleMove = (e) => {
+    if (!dragging) return;
 
-  const el = document.elementFromPoint(e.clientX, e.clientY);
-  if (!el) return;
+    // 🔥 모바일에서 세로 스크롤 가로채기 방지
+    e.preventDefault?.();
 
-  const cell = el.closest?.("[data-key]");
-  const key = cell?.dataset?.key;
+    const el = document.elementFromPoint(e.clientX, e.clientY);
+    if (!el) return;
 
-  if (key) apply(key, dragMode);
-};
+    // 셀 내부 어떤 요소 위에 있어도 cell 찾기
+    const cell = el.closest?.("[data-key]");
+    const key = cell?.dataset?.key;
 
+    if (key) apply(key, dragMode);
+  };
 
+  /* =========================
+     🔥 전역 포인터 이벤트
+  ========================= */
   useEffect(() => {
-    window.addEventListener("pointermove", handleMove);
+    window.addEventListener("pointermove", handleMove, { passive: false });
     window.addEventListener("pointerup", endDrag);
     window.addEventListener("pointercancel", endDrag);
 
@@ -78,6 +93,9 @@ const handleMove = (e) => {
     };
   }, [dragging, dragMode]);
 
+  /* =========================
+     ⏰ 슬롯 생성
+  ========================= */
   const slots = useMemo(() => {
     const arr = [];
     for (let h = START_HOUR; h < END_HOUR; h++) {
@@ -90,45 +108,48 @@ const handleMove = (e) => {
 
   return (
     <div className="timetable-viewport">
-    <div className="timetable-scroll">
-      <div className="timetable-wrapper">
-        <div className="timetable">
-          <div className="header empty" />
-          {DAYS.map((day) => (
-            <div key={day} className="header">{day}</div>
-          ))}
+      <div className={`timetable-scroll ${dragging ? "dragging" : ""}`}>
+        <div className="timetable-wrapper">
+          <div className="timetable">
+            <div className="header empty" />
+            {DAYS.map((day) => (
+              <div key={day} className="header">
+                {day}
+              </div>
+            ))}
 
-          {slots.map((time, slotIndex) => (
-            <Fragment key={slotIndex}>
-              <div className="time">{time}</div>
+            {slots.map((time, slotIndex) => (
+              <Fragment key={slotIndex}>
+                <div className="time">{time}</div>
 
-              {DAYS.map((_, dayIndex) => {
-                const key = `${dayIndex}-${slotIndex}`;
-                const count = heatmap[key] || 0;
-                const isMine = safeValue.has(key);
+                {DAYS.map((_, dayIndex) => {
+                  const key = `${dayIndex}-${slotIndex}`;
+                  const count = heatmap[key] || 0;
+                  const isMine = safeValue.has(key);
 
-                return (
-                  <div
-                    key={key}
-                    data-key={key}
-                    className="cell"
-                    style={{
-                      background:
-                        count > 0
-                          ? `hsl(260, 70%, ${96 - count * 6}%)`
-                          : "var(--primary-soft)",
-                      outline: isMine
-                        ? "2px solid var(--primary)"
-                        : "none",
-                    }}
-                    onPointerDown={(e) => startDrag(e, key)}
-                  />
-                );
-              })}
-            </Fragment>
-          ))}
+                  return (
+                    <div
+                      key={key}
+                      data-key={key}
+                      className="cell"
+                      style={{
+                        background:
+                          count > 0
+                            ? `hsl(260, 70%, ${96 - count * 6}%)`
+                            : "var(--primary-soft)",
+                        outline: isMine
+                          ? "2px solid var(--primary)"
+                          : "none",
+                      }}
+                      onPointerDown={(e) => startDrag(e, key)}
+                    />
+                  );
+                })}
+              </Fragment>
+            ))}
+          </div>
         </div>
       </div>
-    </div></div>
+    </div>
   );
 }
