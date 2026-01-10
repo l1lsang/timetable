@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import Timetable from "./Timetable";
+import Timetable from "../Timetable";
 
 const DAYS = ["월", "화", "수", "목", "금", "토", "일"];
 const START_HOUR = 9;
