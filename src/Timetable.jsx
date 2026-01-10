@@ -147,18 +147,14 @@ export default function Timetable({ heatmap = {}, onChange }) {
 }}
 
               onMouseDown={() => {
-  console.log("🖱️ CELL MOUSEDOWN:", key);
   handleStart(key);
 }}
 
 onMouseEnter={() => {
-  if (!dragging) return;
-  console.log("🖱️ CELL MOUSEENTER:", key);
   handleMouseEnter(key);
 }}
 
 onTouchStart={() => {
-  console.log("📱 CELL TOUCHSTART:", key);
   handleStart(key);
 }}
 
