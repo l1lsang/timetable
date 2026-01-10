@@ -225,3 +225,76 @@ button:hover {
   opacity: 0.6;
   cursor: default;
 }
+@media (max-width: 768px) {
+  .center-wrap {
+    padding: 20px;
+    align-items: flex-start;
+  }
+
+  .card {
+    width: 100%;
+    max-width: 100%;
+    padding: 28px 20px;
+    border-radius: 20px;
+  }
+
+  .home-title {
+    font-size: 24px;
+  }
+
+  .home-desc {
+    font-size: 13px;
+    margin-bottom: 24px;
+  }
+
+  .btn-primary,
+  .btn-outline {
+    font-size: 14px;
+    padding: 14px;
+  }
+}
+@media (max-width: 768px) {
+  .content {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto;
+    height: auto;
+  }
+
+  .side-panel {
+    order: 2;
+    margin-top: 12px;
+  }
+
+  .timetable-wrapper {
+    order: 1;
+    padding: 12px;
+  }
+}
+@media (max-width: 768px) {
+  .timetable-wrapper {
+    overflow-x: auto;
+  }
+
+  .timetable {
+    min-width: 720px; /* 요일 7개 확보 */
+  }
+}
+@media (max-width: 768px) {
+  .cell {
+    min-height: 30px;
+    margin: 2px;
+  }
+
+  .time {
+    font-size: 10px;
+  }
+
+  .header {
+    font-size: 12px;
+  }
+}
+@media (max-width: 768px) {
+  .cell {
+    touch-action: manipulation;
+  }
+}
