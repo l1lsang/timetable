@@ -1,0 +1,227 @@
+/* =========================
+   🌍 전체 페이지
+========================= */
+.page {
+  width: 100vw;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  background: var(--bg-main);
+  color: var(--text-main);
+}
+
+/* =========================
+   🔝 상단 바
+========================= */
+.top-bar {
+  height: 72px;
+  padding: 0 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: transparent;
+}
+
+.top-bar h2 {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+/* =========================
+   🔘 버튼 (보조)
+========================= */
+button {
+  padding: 10px 16px;
+  border-radius: 14px;
+  border: none;
+  background: var(--primary-soft);
+  color: var(--primary);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+button:hover {
+  background: var(--accent);
+}
+
+/* =========================
+   🧱 메인 레이아웃
+========================= */
+.content {
+  display: grid;
+  grid-template-columns: 1fr 260px;
+  height: calc(100vh - 72px);
+  gap: 12px;
+  padding: 0 20px 20px;
+  box-sizing: border-box;
+}
+
+/* =========================
+   📅 시간표 영역
+========================= */
+.timetable-wrapper {
+  width: 100%;
+  height: 100%;
+  padding: 20px;
+  overflow: auto;
+  background: var(--bg-card);
+  border-radius: 24px;
+}
+
+/* =========================
+   📊 시간표 그리드
+========================= */
+.timetable {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 72px repeat(7, 1fr);
+  user-select: none;
+}
+
+/* =========================
+   📆 요일 헤더
+========================= */
+.header {
+  background: transparent;
+  text-align: center;
+  padding: 10px 0 14px;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--primary);
+}
+
+.empty {
+  background: transparent;
+}
+
+/* =========================
+   ⏰ 시간 라벨
+========================= */
+.time {
+  text-align: center;
+  font-size: 11px;
+  color: var(--text-sub);
+  padding: 6px 0;
+}
+
+/* =========================
+   🟪 시간 셀
+========================= */
+.cell {
+  min-height: 36px;
+  margin: 3px;
+  border-radius: 12px;
+  background: var(--primary-soft);
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.05s ease;
+}
+
+.cell:hover {
+  background: var(--accent);
+}
+
+.cell.me {
+  background: var(--primary);
+}
+
+.cell:active {
+  transform: scale(0.96);
+}
+
+/* =========================
+   🏆 사이드 패널
+========================= */
+.side-panel {
+  padding: 20px;
+  background: var(--bg-card);
+  border-radius: 24px;
+}
+
+.side-panel h3 {
+  margin-bottom: 10px;
+  font-size: 16px;
+  color: var(--primary);
+}
+
+.side-panel p {
+  font-size: 14px;
+  color: var(--text-main);
+  margin-bottom: 6px;
+}
+
+/* =========================
+   🧭 중앙 카드 레이아웃
+========================= */
+.center-wrap {
+  min-height: calc(100vh - 72px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 카드 */
+.card {
+  width: 100%;
+  max-width: 420px;
+  padding: 32px 28px;
+  background: var(--bg-card);
+  border-radius: 24px;
+}
+
+/* =========================
+   ✏️ 텍스트
+========================= */
+.title {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--text-main);
+  margin-bottom: 6px;
+  text-align: center;
+}
+
+.desc {
+  font-size: 14px;
+  color: var(--text-sub);
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+/* =========================
+   ⌨️ 입력창
+========================= */
+.input {
+  width: 100%;
+  padding: 14px 16px;
+  margin-bottom: 14px;
+  border-radius: 14px;
+  border: none;
+  background: #f6f5ff;
+  font-size: 14px;
+}
+
+.input:focus {
+  outline: none;
+  background: var(--primary-soft);
+}
+
+/* =========================
+   ⭐ 메인 버튼 (주인공)
+========================= */
+.btn-primary {
+  width: 100%;
+  padding: 14px;
+  border-radius: 16px;
+  background: var(--primary);
+  color: white;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  border: none;
+}
+
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
