@@ -215,3 +215,10 @@
     min-height: 30px;
   }
 }
+@media (max-width: 768px) {
+  .content {
+    display: flex;          /* 🔥 grid 제거 */
+    flex-direction: column; /* 세로 스택 */
+    gap: 12px;
+  }
+}
