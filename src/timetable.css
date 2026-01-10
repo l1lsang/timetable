@@ -180,16 +180,11 @@
 }
 
 
-
 .timetable-viewport {
   width: 100%;
-  max-height: calc(100vh - 180px); /* 🔥 중요 */
-  overflow-y: auto;
-  overflow-x: hidden;
-
-  /* 모바일 스크롤 부드럽게 */
-  -webkit-overflow-scrolling: touch;
+  overflow-y: visible; /* 또는 auto */
 }
+
 .timetable-scroll {
   width: 100%;
   overflow-x: auto;
@@ -212,10 +207,6 @@
   min-width: 760px;   /* 🔥 모바일 기준 가로폭 */
 }
 @media (max-width: 768px) {
-  .timetable-viewport {
-    max-height: calc(100vh - 150px);
-  }
-
   .timetable {
     min-width: 720px;
   }
