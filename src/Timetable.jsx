@@ -3,6 +3,7 @@ import {
   useMemo,
   Fragment,
   useRef,
+  useEffect,
 } from "react";
 import "./timetable.css";
 
@@ -36,7 +37,8 @@ export default function Timetable({
     onChange?.(next);
   };
 
-  const handleStart = (key) => {
+  const handleStart = (e, key) => {
+    e.preventDefault(); // 🔥 핵심
     const mode = safeValue.has(key) ? "remove" : "add";
     setDragging(true);
     setDragMode(mode);
@@ -44,7 +46,7 @@ export default function Timetable({
     apply(key, mode);
   };
 
-  const handleMouseEnter = (key) => {
+  const handleEnter = (key) => {
     setHoverKey(key);
     if (!dragging) return;
     apply(key, dragMode);
@@ -55,6 +57,16 @@ export default function Timetable({
     setDragMode(null);
     visitedRef.current.clear();
   };
+
+  // 🔥 마우스 / 터치 어디서든 드래그 종료
+  useEffect(() => {
+    window.addEventListener("pointerup", handleEnd);
+    window.addEventListener("pointercancel", handleEnd);
+    return () => {
+      window.removeEventListener("pointerup", handleEnd);
+      window.removeEventListener("pointercancel", handleEnd);
+    };
+  }, []);
 
   const slots = useMemo(() => {
     const arr = [];
@@ -68,11 +80,7 @@ export default function Timetable({
 
   return (
     <div className="timetable-scroll">
-      <div
-        className="timetable-wrapper"
-        onMouseUp={handleEnd}
-        onMouseLeave={() => setHoverKey(null)}
-      >
+      <div className="timetable-wrapper">
         <div className="timetable">
           <div className="header empty" />
           {DAYS.map((day) => (
@@ -91,7 +99,6 @@ export default function Timetable({
                 return (
                   <div
                     key={key}
-                    data-key={key}
                     className="cell"
                     style={{
                       background:
@@ -101,13 +108,11 @@ export default function Timetable({
                       outline: isMine
                         ? "2px solid var(--primary)"
                         : "none",
-                      position: "relative",
                     }}
-                    onMouseDown={() => handleStart(key)}
-                    onMouseEnter={() => handleMouseEnter(key)}
-                    onMouseLeave={() => setHoverKey(null)}
+                    onPointerDown={(e) => handleStart(e, key)}
+                    onPointerEnter={() => handleEnter(key)}
+                    onPointerLeave={() => setHoverKey(null)}
                   >
-                    {/* 🔥 hover tooltip */}
                     {hoverKey === key && count > 0 && (
                       <div className="cell-tooltip">
                         👥 {count}명 선택
