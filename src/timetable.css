@@ -330,6 +330,16 @@ button:hover {
   padding: 4px 8px;
   border-radius: 8px;
   white-space: nowrap;
-  pointer-events: none;
+
+  pointer-events: none; /* 🔥🔥🔥 이게 핵심 */
   z-index: 10;
+}
+.cell {
+  position: relative; /* tooltip 기준점 */
+  min-height: 36px;
+  margin: 3px;
+  border-radius: 12px;
+  background: var(--primary-soft);
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.05s ease;
 }
