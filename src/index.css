@@ -93,3 +93,22 @@ button:focus-visible {
 .btn-outline:hover {
   background: var(--primary-soft);
 }
+/* Home 전용 */
+.home-card {
+  background: var(--bg-card);
+  box-shadow: 0 14px 40px rgba(0,0,0,0.08);
+}
+
+.home-title {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin-bottom: 12px;
+  color: var(--text-main);
+}
+
+.home-desc {
+  font-size: 14px;
+  color: var(--text-sub);
+  margin-bottom: 32px;
+}
