@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, Fragment } from "react";
+import { useState, useEffect, useMemo, Fragment, useRef } from "react";
 import "./timetable.css";
 
 const DAYS = ["월", "화", "수", "목", "금", "토", "일"];
@@ -13,38 +13,58 @@ const SLOT_PER_HOUR = 2; // 30분
  */
 export default function Timetable({ heatmap = {}, onChange }) {
   const [dragging, setDragging] = useState(false);
+  const [dragMode, setDragMode] = useState(null); // "add" | "remove"
   const [mySelected, setMySelected] = useState(new Set());
 
+  // 🔁 이번 드래그에서 이미 처리한 셀 기록
+  const visitedRef = useRef(new Set());
+
   /* =========================
-     🧠 셀 토글 (중복 토글 방지)
+     🎯 셀 적용 (add / remove)
   ========================= */
-  const toggle = (key) => {
+  const apply = (key, mode = dragMode) => {
+    if (!mode) return;
+    if (visitedRef.current.has(key)) return;
+
+    visitedRef.current.add(key);
+
     setMySelected((prev) => {
-      if (prev.has(key)) return prev; // 🔥 드래그 중 중복 방지
       const next = new Set(prev);
-      next.add(key);
+
+      if (mode === "add") {
+        next.add(key);
+      } else if (mode === "remove") {
+        next.delete(key);
+      }
+
       return next;
     });
   };
 
   /* =========================
-     🖱️ 마우스 드래그
+     🖱️ / 📱 드래그 시작
   ========================= */
-  const handleMouseDown = (key) => {
+  const handleStart = (key) => {
+    const isSelected = mySelected.has(key);
+    const mode = isSelected ? "remove" : "add";
+
     setDragging(true);
-    toggle(key);
-  };
+    setDragMode(mode);
+    visitedRef.current.clear();
 
-  const handleMouseEnter = (key) => {
-    if (dragging) toggle(key);
-  };
-
-  const handleEnd = () => {
-    setDragging(false);
+    apply(key, mode);
   };
 
   /* =========================
-     📱 모바일 터치 드래그 (핵심)
+     🖱️ 마우스 이동
+  ========================= */
+  const handleMouseEnter = (key) => {
+    if (!dragging) return;
+    apply(key);
+  };
+
+  /* =========================
+     📱 터치 이동 (핵심)
   ========================= */
   const handleTouchMove = (e) => {
     if (!dragging) return;
@@ -55,20 +75,24 @@ export default function Timetable({ heatmap = {}, onChange }) {
       touch.clientY
     );
 
-    if (!el) return;
-    if (!el.classList.contains("cell")) return;
+    if (!el || !el.dataset?.key) return;
+    apply(el.dataset.key);
+  };
 
-    const key = el.dataset.key;
-    if (key) toggle(key);
+  /* =========================
+     🛑 드래그 종료
+  ========================= */
+  const handleEnd = () => {
+    setDragging(false);
+    setDragMode(null);
+    visitedRef.current.clear();
   };
 
   /* =========================
      🔄 선택 변경 시 부모에게 전달
   ========================= */
   useEffect(() => {
-    if (onChange) {
-      onChange(mySelected);
-    }
+    onChange?.(mySelected);
   }, [mySelected, onChange]);
 
   /* =========================
@@ -114,7 +138,7 @@ export default function Timetable({ heatmap = {}, onChange }) {
               return (
                 <div
                   key={key}
-                  data-key={key}                // 🔥 중요
+                  data-key={key}
                   className={`cell ${
                     mySelected.has(key) ? "me" : ""
                   }`}
@@ -124,9 +148,9 @@ export default function Timetable({ heatmap = {}, onChange }) {
                         ? `rgba(139, 92, 246, ${0.15 * count})`
                         : undefined,
                   }}
-                  onMouseDown={() => handleMouseDown(key)}
+                  onMouseDown={() => handleStart(key)}
                   onMouseEnter={() => handleMouseEnter(key)}
-                  onTouchStart={() => handleMouseDown(key)}
+                  onTouchStart={() => handleStart(key)}
                 />
               );
             })}
