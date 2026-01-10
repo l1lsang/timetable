@@ -140,10 +140,14 @@ export default function Timetable({ heatmap = {}, onChange }) {
                 className={`cell ${mySelected.has(key) ? "me" : ""}`}
 style={{
   background: mySelected.has(key)
-    ? "var(--primary)"          // 내 선택
+    ? "var(--primary-soft)"     // 🔥 내 선택도 연보라 계열 유지
     : count > 0
-    ? `hsl(250, 70%, ${98 - count * 6}%)`
-    : "var(--primary-soft)",
+      ? `hsl(250, 60%, ${96 - count * 4}%)`
+      : "var(--primary-soft)",
+
+  outline: mySelected.has(key)
+    ? "2px solid var(--primary)" // 🔥 내 선택은 테두리로 강조
+    : "none",
 }}
 
               onMouseDown={() => {
