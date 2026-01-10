@@ -45,27 +45,23 @@ export default function Room() {
 
   /* =========================
      📊 히트맵 계산
+     👉 ❗ 내 선택은 제외
   ========================= */
   const heatmap = useMemo(() => {
     const map = {};
 
-    // 다른 사람들
+    // 🔥 다른 사람들만 히트맵 기준
     othersSelections.forEach((set) => {
       set.forEach((k) => {
         map[k] = (map[k] || 0) + 1;
       });
     });
 
-    // 내 선택
-    mySelection.forEach((k) => {
-      map[k] = (map[k] || 0) + 1;
-    });
-
     return map;
-  }, [othersSelections, mySelection]);
+  }, [othersSelections]);
 
   /* =========================
-     🔥 TOP3 계산
+     🔥 TOP3 계산 (다른 사람 기준)
   ========================= */
   const top3 = useMemo(() => {
     return Object.entries(heatmap)
