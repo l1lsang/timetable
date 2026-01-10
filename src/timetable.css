@@ -319,3 +319,17 @@ button:hover {
   display: grid;
   grid-template-columns: 72px repeat(7, 1fr);
 }
+.cell-tooltip {
+  position: absolute;
+  top: -26px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(50, 50, 70, 0.9);
+  color: white;
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 8px;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 10;
+}
