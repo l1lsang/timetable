@@ -1,6 +1,5 @@
 /* =========================
    🧩 AUTH / HOME 공통 레이아웃
-   (CreateRoom, JoinRoom, Home)
 ========================= */
 .auth-page {
   width: 100vw;
@@ -10,34 +9,52 @@
   justify-content: center;
   padding: 24px;
   background: var(--bg-main);
-  color: var(--text-main);
   box-sizing: border-box;
+
+  /* 🔥 클릭 차단 버그 방지 */
+  position: relative;
+  pointer-events: auto;
 }
 
+/* =========================
+   🟣 카드
+========================= */
 .auth-card {
   width: 100%;
   max-width: 420px;
   padding: 32px 28px;
-  background: #ffffff;
   border-radius: 20px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+
+  background: linear-gradient(
+    180deg,
+    #6b5cff 0%,
+    #5849e6 100%
+  );
+
+  box-shadow: 0 14px 36px rgba(107, 92, 255, 0.35);
   box-sizing: border-box;
+
+  position: relative;
+  pointer-events: auto;
 }
 
+/* =========================
+   🧾 텍스트
+========================= */
 .auth-title {
   font-size: 26px;
   font-weight: 800;
   letter-spacing: -0.02em;
   margin: 0 0 10px;
   text-align: center;
-  color: var(--text-main);
+  color: #ffffff;
 }
 
 .auth-desc {
   margin: 0 0 24px;
   text-align: center;
   font-size: 14px;
-  color: var(--text-sub);
+  color: rgba(255,255,255,0.85);
   line-height: 1.6;
 }
 
@@ -49,22 +66,27 @@
   padding: 14px 16px;
   margin-bottom: 12px;
   border-radius: 14px;
-  border: 1px solid rgba(0,0,0,0.08);
-  background: #f7f6ff;
+  border: none;
+
+  background: rgba(255,255,255,0.95);
   font-size: 14px;
-  color: var(--text-main);
+  color: #2c2c2c;
   box-sizing: border-box;
+
+  pointer-events: auto;
+}
+
+.auth-input::placeholder {
+  color: #8b8b8b;
 }
 
 .auth-input:focus {
   outline: none;
-  border-color: rgba(107, 92, 255, 0.55);
-  box-shadow: 0 0 0 4px rgba(107, 92, 255, 0.12);
-  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(255,255,255,0.35);
 }
 
 /* =========================
-   🔘 버튼 (전역 button 금지! 이 클래스만 사용)
+   🔘 버튼
 ========================= */
 .auth-btn {
   width: 100%;
@@ -75,7 +97,9 @@
   font-weight: 700;
   cursor: pointer;
   box-sizing: border-box;
+
   transition: transform 0.05s ease, filter 0.15s ease;
+  pointer-events: auto;
 }
 
 .auth-btn:active {
@@ -89,23 +113,23 @@
 
 /* 메인 버튼 */
 .auth-btn-primary {
-  background: var(--primary);
-  color: #ffffff;
+  background: #ffffff;
+  color: #5b4ce6;
 }
 
 /* 보조 버튼 */
 .auth-btn-outline {
-  background: #ffffff;
-  color: var(--primary);
-  border: 2px solid var(--primary);
+  background: transparent;
+  color: #ffffff;
+  border: 2px solid rgba(255,255,255,0.75);
 }
 
 /* hover */
 .auth-btn-primary:hover {
-  filter: brightness(0.96);
+  filter: brightness(0.95);
 }
 .auth-btn-outline:hover {
-  background: rgba(107, 92, 255, 0.06);
+  background: rgba(255,255,255,0.15);
 }
 
 /* 버튼 간격 */
