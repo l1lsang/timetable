@@ -15,7 +15,7 @@ function slotIndexToTime(slotIndex) {
 }
 
 /* =========================
-   🏷️ TOP3 포맷
+   🏷️ TOP3 표시용 포맷
 ========================= */
 function formatSlot(key, count) {
   const [dayIndex, slotIndex] = key.split("-").map(Number);
@@ -27,41 +27,25 @@ function formatSlot(key, count) {
 
 export default function Room() {
   /* =========================
-     🧍 내 선택 (로컬)
+     🧍 내 선택
   ========================= */
   const [mySelection, setMySelection] = useState(new Set());
 
   /* =========================
-     🧑‍🤝‍🧑 다른 사람들 (임시 더미)
-     👉 나중에 Firestore 데이터로 교체
-  ========================= */
-  const othersSelections = useMemo(
-    () => [
-      new Set(["2-6", "2-7", "4-10"]),
-      new Set(["2-6", "4-10"]),
-    ],
-    []
-  );
-
-  /* =========================
-     📊 히트맵 계산
-     👉 ❗ 내 선택은 제외
+     📊 히트맵
+     👉 지금은 내 선택만 반영
+     👉 나중에 Firestore 데이터 합치기 쉬운 구조
   ========================= */
   const heatmap = useMemo(() => {
     const map = {};
-
-    // 🔥 다른 사람들만 히트맵 기준
-    othersSelections.forEach((set) => {
-      set.forEach((k) => {
-        map[k] = (map[k] || 0) + 1;
-      });
+    mySelection.forEach((key) => {
+      map[key] = (map[key] || 0) + 1;
     });
-
     return map;
-  }, [othersSelections]);
+  }, [mySelection]);
 
   /* =========================
-     🔥 TOP3 계산 (다른 사람 기준)
+     🔥 TOP 3
   ========================= */
   const top3 = useMemo(() => {
     return Object.entries(heatmap)
@@ -75,7 +59,7 @@ export default function Room() {
         {/* 📅 시간표 */}
         <Timetable
           heatmap={heatmap}
-          onChange={setMySelection} // 🔥 드래그 종료 시 1번
+          onChange={setMySelection}
         />
 
         {/* 🏆 사이드 패널 */}
