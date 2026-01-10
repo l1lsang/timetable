@@ -188,13 +188,12 @@
 .timetable-scroll {
   width: 100%;
   overflow-x: auto;
-  overflow-y: hidden;
+  overflow-y: visible;   /* 🔥 핵심 수정 */
 
-  touch-action: pan-x;
   -webkit-overflow-scrolling: touch;
-
-  overscroll-behavior-x: contain;
+  touch-action: pan-x;
 }
+
 .timetable-wrapper {
   min-width: max-content;   /* 🔥 가로 스크롤 핵심 */
   padding: 12px;
