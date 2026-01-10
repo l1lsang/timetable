@@ -1,0 +1,129 @@
+/* =========================
+   🧩 AUTH / HOME 공통 레이아웃
+   (CreateRoom, JoinRoom, Home)
+========================= */
+.auth-page {
+  width: 100vw;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: var(--bg-main);
+  color: var(--text-main);
+  box-sizing: border-box;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 420px;
+  padding: 32px 28px;
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+  box-sizing: border-box;
+}
+
+.auth-title {
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin: 0 0 10px;
+  text-align: center;
+  color: var(--text-main);
+}
+
+.auth-desc {
+  margin: 0 0 24px;
+  text-align: center;
+  font-size: 14px;
+  color: var(--text-sub);
+  line-height: 1.6;
+}
+
+/* =========================
+   ⌨️ 입력
+========================= */
+.auth-input {
+  width: 100%;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(0,0,0,0.08);
+  background: #f7f6ff;
+  font-size: 14px;
+  color: var(--text-main);
+  box-sizing: border-box;
+}
+
+.auth-input:focus {
+  outline: none;
+  border-color: rgba(107, 92, 255, 0.55);
+  box-shadow: 0 0 0 4px rgba(107, 92, 255, 0.12);
+  background: #ffffff;
+}
+
+/* =========================
+   🔘 버튼 (전역 button 금지! 이 클래스만 사용)
+========================= */
+.auth-btn {
+  width: 100%;
+  padding: 14px;
+  border-radius: 14px;
+  border: none;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  box-sizing: border-box;
+  transition: transform 0.05s ease, filter 0.15s ease;
+}
+
+.auth-btn:active {
+  transform: scale(0.98);
+}
+
+.auth-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+/* 메인 버튼 */
+.auth-btn-primary {
+  background: var(--primary);
+  color: #ffffff;
+}
+
+/* 보조 버튼 */
+.auth-btn-outline {
+  background: #ffffff;
+  color: var(--primary);
+  border: 2px solid var(--primary);
+}
+
+/* hover */
+.auth-btn-primary:hover {
+  filter: brightness(0.96);
+}
+.auth-btn-outline:hover {
+  background: rgba(107, 92, 255, 0.06);
+}
+
+/* 버튼 간격 */
+.auth-btn + .auth-btn {
+  margin-top: 12px;
+}
+
+/* =========================
+   📱 모바일
+========================= */
+@media (max-width: 768px) {
+  .auth-card {
+    max-width: 100%;
+    padding: 28px 18px;
+    border-radius: 18px;
+  }
+
+  .auth-title {
+    font-size: 24px;
+  }
+}

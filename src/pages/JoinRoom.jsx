@@ -61,7 +61,7 @@ export default function JoinRoom() {
       }
 
       /* =========================
-         👤 멤버 등록 (batch)
+         👤 멤버 등록
       ========================= */
       const userId = uuidv4();
       const batch = writeBatch(db);
@@ -74,7 +74,6 @@ export default function JoinRoom() {
         }
       );
 
-      // 🔥 write 1번
       await batch.commit();
 
       /* =========================
@@ -110,50 +109,48 @@ export default function JoinRoom() {
   };
 
   return (
-    <div className="page">
-      <div className="center-wrap">
-        <div className="card">
-          <h2 className="title">🔑 초대받은 방 들어가기</h2>
-          <p className="desc">
-            친구한테 받은 방 코드로 바로 들어갈 수 있어요
-          </p>
+    <div className="auth-page">
+      <div className="auth-card">
+        <h2 className="auth-title">🔑 초대받은 방 들어가기</h2>
+        <p className="auth-desc">
+          친구한테 받은 방 코드로 바로 들어갈 수 있어요
+        </p>
 
-          <input
-            className="input"
-            placeholder="방 코드 (예: AB3KQ9)"
-            value={roomId}
-            onChange={(e) => setRoomId(e.target.value)}
-            onKeyDown={handleKeyDown}
-            aria-label="방 코드"
-          />
+        <input
+          className="auth-input"
+          placeholder="방 코드 (예: AB3KQ9)"
+          value={roomId}
+          onChange={(e) => setRoomId(e.target.value)}
+          onKeyDown={handleKeyDown}
+          aria-label="방 코드"
+        />
 
-          <input
-            className="input"
-            placeholder="내 닉네임"
-            value={nickname}
-            onChange={(e) => setNickname(e.target.value)}
-            onKeyDown={handleKeyDown}
-            aria-label="닉네임"
-          />
+        <input
+          className="auth-input"
+          placeholder="내 닉네임"
+          value={nickname}
+          onChange={(e) => setNickname(e.target.value)}
+          onKeyDown={handleKeyDown}
+          aria-label="닉네임"
+        />
 
-          <input
-            className="input"
-            type="password"
-            placeholder="비밀번호 (있다면)"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            onKeyDown={handleKeyDown}
-            aria-label="비밀번호"
-          />
+        <input
+          className="auth-input"
+          type="password"
+          placeholder="비밀번호 (있다면)"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          onKeyDown={handleKeyDown}
+          aria-label="비밀번호"
+        />
 
-          <button
-            className="btn-primary"
-            onClick={handleJoin}
-            disabled={loading}
-          >
-            {loading ? "들어가는 중이에요…" : "방 들어가기"}
-          </button>
-        </div>
+        <button
+          className="auth-btn auth-btn-primary"
+          onClick={handleJoin}
+          disabled={loading}
+        >
+          {loading ? "들어가는 중이에요…" : "방 들어가기"}
+        </button>
       </div>
     </div>
   );

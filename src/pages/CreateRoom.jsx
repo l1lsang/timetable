@@ -18,14 +18,13 @@ export default function CreateRoom() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // 🔒 중복 실행 완전 차단용
+  // 🔒 중복 실행 완전 차단
   const lockedRef = useRef(false);
 
   const createRoomId = () =>
     Math.random().toString(36).slice(2, 8).toUpperCase();
 
   const handleCreateRoom = async () => {
-    // 🔥 중복 실행 방지
     if (loading || lockedRef.current) return;
 
     if (!title.trim() || !nickname.trim()) {
@@ -59,7 +58,6 @@ export default function CreateRoom() {
         }
       );
 
-      // 🔥 write 1번으로 처리
       await batch.commit();
 
       // 🔑 로컬 저장
@@ -71,7 +69,6 @@ export default function CreateRoom() {
     } catch (error) {
       console.error("❌ 방 생성 오류:", error);
 
-      // 🔔 quota 에러 UX
       if (error?.code === "resource-exhausted") {
         alert(
           "요청이 잠시 많아요 🥲\n잠깐만 기다렸다가 다시 시도해주세요!"
@@ -94,51 +91,49 @@ export default function CreateRoom() {
   };
 
   return (
-    <div className="page">
-      <div className="center-wrap">
-        <div className="card">
-          <h2 className="title">➕ 새 약속 만들기</h2>
-          <p className="desc">
-            친구들이랑 가능한 시간을 <br />
-            천천히 골라보세요 🙂
-          </p>
+    <div className="auth-page">
+      <div className="auth-card">
+        <h2 className="auth-title">➕ 새 약속 만들기</h2>
+        <p className="auth-desc">
+          친구들이랑 가능한 시간을 <br />
+          천천히 골라보세요 🙂
+        </p>
 
-          <input
-            className="input"
-            placeholder="방 이름 (예: 스터디, 회식)"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            onKeyDown={handleKeyDown}
-            aria-label="방 이름"
-          />
+        <input
+          className="auth-input"
+          placeholder="방 이름 (예: 스터디, 회식)"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          onKeyDown={handleKeyDown}
+          aria-label="방 이름"
+        />
 
-          <input
-            className="input"
-            placeholder="내 닉네임"
-            value={nickname}
-            onChange={(e) => setNickname(e.target.value)}
-            onKeyDown={handleKeyDown}
-            aria-label="닉네임"
-          />
+        <input
+          className="auth-input"
+          placeholder="내 닉네임"
+          value={nickname}
+          onChange={(e) => setNickname(e.target.value)}
+          onKeyDown={handleKeyDown}
+          aria-label="닉네임"
+        />
 
-          <input
-            className="input"
-            type="password"
-            placeholder="비밀번호 (선택)"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            onKeyDown={handleKeyDown}
-            aria-label="비밀번호"
-          />
+        <input
+          className="auth-input"
+          type="password"
+          placeholder="비밀번호 (선택)"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          onKeyDown={handleKeyDown}
+          aria-label="비밀번호"
+        />
 
-          <button
-            className="btn-primary"
-            onClick={handleCreateRoom}
-            disabled={loading}
-          >
-            {loading ? "방 만드는 중이에요…" : "방 만들기"}
-          </button>
-        </div>
+        <button
+          className="auth-btn auth-btn-primary"
+          onClick={handleCreateRoom}
+          disabled={loading}
+        >
+          {loading ? "방 만드는 중이에요…" : "방 만들기"}
+        </button>
       </div>
     </div>
   );
