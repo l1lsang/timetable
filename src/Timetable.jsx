@@ -36,14 +36,16 @@ export default function Timetable({
     onChange?.(next);
   };
 
-  const startDrag = (e, key) => {
-    e.preventDefault();
-    const mode = safeValue.has(key) ? "remove" : "add";
-    setDragging(true);
-    setDragMode(mode);
-    visitedRef.current.clear();
-    apply(key, mode);
-  };
+const startDrag = (e, key) => {
+  e.preventDefault();
+  e.currentTarget.setPointerCapture?.(e.pointerId);
+
+  const mode = safeValue.has(key) ? "remove" : "add";
+  setDragging(true);
+  setDragMode(mode);
+  visitedRef.current.clear();
+  apply(key, mode);
+};
 
   const endDrag = () => {
     setDragging(false);
@@ -51,17 +53,18 @@ export default function Timetable({
     visitedRef.current.clear();
   };
 
-  const handleMove = (e) => {
-    if (!dragging) return;
+const handleMove = (e) => {
+  if (!dragging) return;
 
-    const el = document.elementFromPoint(e.clientX, e.clientY);
-    if (!el) return;
+  const el = document.elementFromPoint(e.clientX, e.clientY);
+  if (!el) return;
 
-    const key = el.dataset?.key;
-    if (key) {
-      apply(key, dragMode);
-    }
-  };
+  const cell = el.closest?.("[data-key]");
+  const key = cell?.dataset?.key;
+
+  if (key) apply(key, dragMode);
+};
+
 
   useEffect(() => {
     window.addEventListener("pointermove", handleMove);
