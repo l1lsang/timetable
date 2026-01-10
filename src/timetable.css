@@ -121,7 +121,7 @@ button:hover {
   background: var(--accent);
 }
 .cell.me {
-  background: hsl(250, 80%, 70%); /* 확실히 보이게 */
+  background: hsl(250, 78%, 75%); /* 확실히 보이게 */
   outline: none;
 }
 
