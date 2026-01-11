@@ -3,7 +3,6 @@ import {
   useMemo,
   Fragment,
   useRef,
-  useEffect,
 } from "react";
 import "./timetable.css";
 
@@ -36,11 +35,9 @@ export default function Timetable({
     onChange?.(next);
   };
 
-  /* =========================
-     🔥 드래그 시작
-  ========================= */
+  /* 🔥 드래그 시작 */
   const startDrag = (e, key) => {
-    e.preventDefault(); // 스크롤/텍스트선택 차단
+    e.preventDefault();
     e.currentTarget.setPointerCapture?.(e.pointerId);
 
     const mode = safeValue.has(key) ? "remove" : "add";
@@ -50,52 +47,28 @@ export default function Timetable({
     apply(key, mode);
   };
 
-  /* =========================
-     🔥 드래그 종료
-  ========================= */
+  /* 🔥 드래그 종료 */
   const endDrag = () => {
     setDragging(false);
     setDragMode(null);
     visitedRef.current.clear();
   };
 
-  /* =========================
-     🔥 드래그 이동 (가로 + 세로)
-  ========================= */
+  /* 🔥 드래그 이동 (핵심!) */
   const handleMove = (e) => {
     if (!dragging) return;
 
-    // 🔥 모바일에서 세로 스크롤 가로채기 방지
-    e.preventDefault?.();
+    e.preventDefault();
 
     const el = document.elementFromPoint(e.clientX, e.clientY);
     if (!el) return;
 
-    // 셀 내부 어떤 요소 위에 있어도 cell 찾기
     const cell = el.closest?.("[data-key]");
     const key = cell?.dataset?.key;
 
     if (key) apply(key, dragMode);
   };
 
-  /* =========================
-     🔥 전역 포인터 이벤트
-  ========================= */
-  useEffect(() => {
-    window.addEventListener("pointermove", handleMove, { passive: false });
-    window.addEventListener("pointerup", endDrag);
-    window.addEventListener("pointercancel", endDrag);
-
-    return () => {
-      window.removeEventListener("pointermove", handleMove);
-      window.removeEventListener("pointerup", endDrag);
-      window.removeEventListener("pointercancel", endDrag);
-    };
-  }, [dragging, dragMode]);
-
-  /* =========================
-     ⏰ 슬롯 생성
-  ========================= */
   const slots = useMemo(() => {
     const arr = [];
     for (let h = START_HOUR; h < END_HOUR; h++) {
@@ -108,14 +81,17 @@ export default function Timetable({
 
   return (
     <div className="timetable-viewport">
-      <div className={`timetable-scroll ${dragging ? "dragging" : ""}`}>
+      <div
+        className={`timetable-scroll ${dragging ? "dragging" : ""}`}
+        onPointerMove={handleMove}
+        onPointerUp={endDrag}
+        onPointerCancel={endDrag}
+      >
         <div className="timetable-wrapper">
           <div className="timetable">
             <div className="header empty" />
             {DAYS.map((day) => (
-              <div key={day} className="header">
-                {day}
-              </div>
+              <div key={day} className="header">{day}</div>
             ))}
 
             {slots.map((time, slotIndex) => (
